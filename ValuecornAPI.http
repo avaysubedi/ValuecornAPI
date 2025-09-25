@@ -1,0 +1,6 @@
+@ValuecornAPI_HostAddress = http://localhost:5287
+
+GET {{ValuecornAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
