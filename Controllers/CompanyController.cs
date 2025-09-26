@@ -2,81 +2,50 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using ValuecornAPI.Data;
 using ValuecornAPI.Models;
 
 namespace ValuecornAPI.Controllers
 {
- 
-        [ApiController]
-        [Route("api/company")]
-        public class CompanyController : ControllerBase
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CompanyController : ControllerBase
+    {
+        private readonly ICompanyRepository _companyRepo;
+
+        public CompanyController(ICompanyRepository companyRepo)
         {
-            private readonly IConfiguration _config;
-
-            public CompanyController(IConfiguration config)
-            {
-                _config = config;
-            }
-
-            // INSERT / UPDATE
-            [HttpPost]
-            [HttpPut("{id?}")]
-            public async Task<IActionResult> UpsertCompany([FromBody] Company company, int? id = null)
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@CompanyId", id);
-                    parameters.Add("@CompanyCode", company.CompanyCode);
-                    parameters.Add("@CompanyName", company.CompanyName);
-                    parameters.Add("@CountryCode", company.CountryCode);
-                    parameters.Add("@IndustryCode", company.IndustryCode);
-                    parameters.Add("@Currency", company.Currency);
-                    parameters.Add("@FiscalYearEnd", company.FiscalYearEnd);
-                    parameters.Add("@SharesOutstanding", company.SharesOutstanding);
-                    parameters.Add("@NetDebt", company.NetDebt);
-                    parameters.Add("@CashBalance", company.CashBalance);
-
-                    var result = await conn.QuerySingleAsync<int>(
-                        "sp_UpsertCompany",
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-
-                    return Ok(new { CompanyId = result });
-                }
-            }
-
-            // GET BY ID
-            [HttpGet("{id}")]
-            public async Task<IActionResult> GetCompanyById(int id)
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QuerySingleOrDefaultAsync<Company>(
-                        "SELECT * FROM dbo.Companies WHERE CompanyId = @Id",
-                        new { Id = id }
-                    );
-
-                    if (result == null) return NotFound();
-                    return Ok(result);
-                }
-            }
-
-            // GET ALL
-            [HttpGet]
-            public async Task<IActionResult> GetCompanies()
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QueryAsync<Company>(
-                        "SELECT * FROM dbo.Companies ORDER BY CompanyName"
-                    );
-                    return Ok(result);
-                }
-            }
+            _companyRepo = companyRepo;
         }
 
+        // POST: api/company
+        [HttpPost]
+        public async Task<IActionResult> CreateCompany([FromBody] CompanyDto dto)
+        {
+            var userId = GetUserId(); // from JWT or session
+            var companyId = await _companyRepo.UpsertCompanyAsync(dto, userId);
+            return Ok(new { CompanyId = companyId });
+        }
 
+        // PUT: api/company/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCompany(int id, [FromBody] CompanyDto dto)
+        {
+            dto.CompanyId = id; // ensure consistency
+            var userId = GetUserId();
+            var companyId = await _companyRepo.UpsertCompanyAsync(dto, userId);
+            return Ok(new { CompanyId = companyId });
+        }
+
+        private int GetUserId()
+        {
+            // Example: JWT claim "UserId"
+            var claim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            return claim != null ? int.Parse(claim.Value) : 0;
+        }
     }
+
+
+
+}
 
