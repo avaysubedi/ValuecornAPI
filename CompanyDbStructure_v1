@@ -1,0 +1,228 @@
+
+1. Core Table
+
+DimCompany
+
+CompanyId INT IDENTITY PK
+
+CompanyCode VARCHAR(50)
+
+CompanyName NVARCHAR(255)
+
+TradeName NVARCHAR(255)
+
+DateOfIncorporation DATE
+
+CountryCode VARCHAR(10)
+
+LegalStructure NVARCHAR(100)
+
+RegisteredAddressId INT FK → DimAddress
+
+OperationalAddressId INT FK → DimAddress
+
+BusinessLicenseNumber NVARCHAR(50)
+
+LicenseExpiryDate DATE
+
+OfficialPhone NVARCHAR(50)
+
+OfficialEmail NVARCHAR(255)
+
+Website NVARCHAR(255)
+
+CreatedAt DATETIME
+
+UpdatedAt DATETIME
+
+2. Address Table
+
+DimAddress
+
+AddressId INT IDENTITY PK
+
+AddressLine NVARCHAR(500)
+
+City NVARCHAR(100)
+
+Country NVARCHAR(100)
+
+POBox NVARCHAR(50)
+
+PostalCode NVARCHAR(20)
+
+3. Shareholders
+
+FactCompanyShareholders
+
+ShareholderId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+ShareholderName NVARCHAR(255)
+
+Nationality NVARCHAR(100)
+
+Percentage DECIMAL(5,2)
+
+IsUBO BIT
+
+UBOId NVARCHAR(100)
+
+4. Management
+
+FactCompanyManagement
+
+ManagementId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+PersonName NVARCHAR(255)
+
+Role NVARCHAR(100)
+
+IsAuthorizedSignatory BIT
+
+5. Business Activities
+
+FactCompanyActivities
+
+ActivityId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+ActivityName NVARCHAR(255)
+
+ActivityCode NVARCHAR(50)
+
+IsFreeZoneQualifying BIT
+
+6. Financials
+
+DimCompanyFinancials
+
+FinancialId INT IDENTITY PK
+
+CompanyId INT UNIQUE FK → DimCompany
+
+FiscalYearEnd TINYINT
+
+AccountingStandards NVARCHAR(50)
+
+ExternalAuditor NVARCHAR(255)
+
+7. Banking
+
+FactCompanyBanking
+
+BankId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+BankName NVARCHAR(255)
+
+AccountNumber NVARCHAR(100)
+
+Currency NVARCHAR(10)
+
+LoanDetails NVARCHAR(MAX)
+
+OverdraftLimit DECIMAL(18,2)
+
+8. Tax & Compliance
+
+DimCompanyTax
+
+TaxId INT IDENTITY PK
+
+CompanyId INT UNIQUE FK → DimCompany
+
+VATRegNo NVARCHAR(50)
+
+VATDate DATE
+
+CorporateTaxRegNo NVARCHAR(50)
+
+CorporateTaxDate DATE
+
+FreeZoneBenefit NVARCHAR(255)
+
+Exemptions NVARCHAR(MAX)
+
+9. Group Structure
+
+FactCompanyGroup
+
+GroupId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+RelatedEntityName NVARCHAR(255)
+
+RelationType NVARCHAR(50)
+
+Country NVARCHAR(100)
+
+OwnershipPercentage DECIMAL(5,2)
+
+10. Contracts
+
+FactCompanyContracts
+
+ContractId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+ContractType NVARCHAR(100)
+
+PartyName NVARCHAR(255)
+
+ContractValue DECIMAL(18,2)
+
+ExpiryDate DATE
+
+Notes NVARCHAR(MAX)
+
+11. HR
+
+DimCompanyHR
+
+HRId INT IDENTITY PK
+
+CompanyId INT UNIQUE FK → DimCompany
+
+TotalEmployees INT
+
+WPSNumber NVARCHAR(50)
+
+Policies NVARCHAR(MAX)
+
+12. Insurance
+
+FactCompanyInsurance
+
+InsuranceId INT IDENTITY PK
+
+CompanyId INT FK → DimCompany
+
+InsuranceType NVARCHAR(100)
+
+Provider NVARCHAR(255)
+
+CoverageAmount DECIMAL(18,2)
+
+ExpiryDate DATE
+
+13. IT
+
+DimCompanyIT
+
+ITId INT IDENTITY PK
+
+CompanyId INT UNIQUE FK → DimCompany
+
+ERPSystem NVARCHAR(100)
+
+CybersecurityPolicy NVARCHAR(MAX)
+
+BackupRecoveryPlan NVARCHAR(MAX)
