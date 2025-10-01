@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Microsoft.Data.SqlClient;
 using System.Data;
 using ValuecornAPI.Models;
 
@@ -12,21 +11,18 @@ namespace ValuecornAPI.Data
 
     public class CompanyRepository : ICompanyRepository
     {
-        private readonly string _connectionString;
+        private readonly IDbConnection _db;
 
-        public CompanyRepository(IConfiguration config)
+        public CompanyRepository(IDbConnection db)
         {
-            _connectionString = config.GetConnectionString("DefaultConnection");
+            _db = db;
         }
 
         public async Task<int> UpsertCompanyAsync(CompanyDto company, int userId)
         {
-            using var connection = new SqlConnection(_connectionString);
-
             var parameters = new DynamicParameters();
             parameters.Add("@CompanyId", company.CompanyId, DbType.Int32, ParameterDirection.InputOutput);
             parameters.Add("@UserId", userId);
-
             parameters.Add("@CompanyCode", company.CompanyCode);
             parameters.Add("@CompanyName", company.CompanyName);
             parameters.Add("@TradeName", company.TradeName);
@@ -40,7 +36,8 @@ namespace ValuecornAPI.Data
             parameters.Add("@Website", company.Website);
             parameters.Add("@IndustryCode", company.IndustryCode);
             parameters.Add("@Currency", company.Currency);
-            await connection.ExecuteAsync(
+
+            await _db.ExecuteAsync(
                 "sp_UpsertCompanyCore",
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -49,5 +46,4 @@ namespace ValuecornAPI.Data
             return parameters.Get<int>("@CompanyId");
         }
     }
-
 }

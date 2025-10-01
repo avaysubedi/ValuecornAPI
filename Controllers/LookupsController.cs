@@ -1,61 +1,42 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
+using Dapper;
 using System.Data;
 
 namespace ValuecornAPI.Controllers
 {
- 
-        [ApiController]
-        [Route("api/lookups")]
-        public class LookupsController : ControllerBase
+    [ApiController]
+    [Route("api/lookups")]
+    public class LookupsController : ControllerBase
+    {
+        private readonly IDbConnection _db;
+        public LookupsController(IDbConnection db) => _db = db;
+
+        [HttpGet("countries")]
+        public async Task<IActionResult> GetCountries()
         {
-            private readonly IConfiguration _config;
-            public LookupsController(IConfiguration config) { _config = config; }
-
-            [HttpGet("countries")]
-            public async Task<IActionResult> GetCountries()
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QueryAsync("sp_GetCountryEquityRiskPremiums", commandType: CommandType.StoredProcedure);
-                    return Ok(result);
-                }
-            }
-
-            [HttpGet("industries")]
-            public async Task<IActionResult> GetIndustries()
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QueryAsync("sp_GetIndustries", commandType: CommandType.StoredProcedure);
-                    return Ok(result);
-                }
-            }
-
-            [HttpGet("ratings")]
-            public async Task<IActionResult> GetRatings()
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QueryAsync("sp_GetSyntheticRatings", commandType: CommandType.StoredProcedure);
-                    return Ok(result);
-                }
-            }
-
-            [HttpGet("countrypremiums")]
-            public async Task<IActionResult> GetCountryPremiums()
-            {
-                using (var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
-                {
-                    var result = await conn.QueryAsync(
-                        "sp_GetCountryEquityRiskPremiums",
-                        
-                        commandType: CommandType.StoredProcedure
-                    );
-                    return Ok(result);
-                }
-            }
+            var result = await _db.QueryAsync("sp_GetCountryEquityRiskPremiums", commandType: CommandType.StoredProcedure);
+            return Ok(result);
         }
 
+        [HttpGet("industries")]
+        public async Task<IActionResult> GetIndustries()
+        {
+            var result = await _db.QueryAsync("sp_GetIndustries", commandType: CommandType.StoredProcedure);
+            return Ok(result);
+        }
+
+        [HttpGet("ratings")]
+        public async Task<IActionResult> GetRatings()
+        {
+            var result = await _db.QueryAsync("sp_GetSyntheticRatings", commandType: CommandType.StoredProcedure);
+            return Ok(result);
+        }
+
+        [HttpGet("countrypremiums")]
+        public async Task<IActionResult> GetCountryPremiums()
+        {
+            var result = await _db.QueryAsync("sp_GetCountryEquityRiskPremiums", commandType: CommandType.StoredProcedure);
+            return Ok(result);
+        }
     }
+}
